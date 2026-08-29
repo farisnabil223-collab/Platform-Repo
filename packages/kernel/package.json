@@ -1,0 +1,17 @@
+{
+  "name": "@eduverse/kernel",
+  "version": "1.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint src/**/*.ts --fix"
+  },
+  "dependencies": {
+    "uuidv7": "^1.0.1"
+  },
+  "devDependencies": {
+    "@eduverse/config": "*"
+  }
+}

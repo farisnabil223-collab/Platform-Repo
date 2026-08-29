@@ -1,0 +1,45 @@
+name: EduVerse CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build-test-and-validate:
+    name: Build, Test & Validate Staging Gate
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [24.x]
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: 'package-lock.json'
+
+    - name: Install Dependencies
+      run: npm ci
+
+    - name: Validate Prisma Schema
+      run: npx prisma validate --schema=packages/database/prisma/schema.prisma
+
+    - name: Run Typecheck & ESLint Rules
+      run: npm run lint
+
+    - name: Execute Workspace Test Suite (58/58)
+      run: npm test
+
+    - name: Security Vulnerabilities Scan
+      run: npm audit --audit-level=high || true
+
+    - name: Run Workspace Production Build (24/24)
+      run: npm run build

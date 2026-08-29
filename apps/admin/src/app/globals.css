@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Changa:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 43 33% 96%;
+  --foreground: 20 11% 12%;
+  --card: 0 0% 100%;
+  --card-foreground: 20 11% 12%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 20 11% 12%;
+  --primary: 219 49% 21%;
+  --primary-foreground: 43 33% 96%;
+  --secondary: 43 20% 90%;
+  --secondary-foreground: 219 49% 21%;
+  --muted: 43 20% 92%;
+  --muted-foreground: 20 8% 45%;
+  --accent: 173 58% 39%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 8 74% 56%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 43 15% 85%;
+  --input: 43 15% 85%;
+  --ring: 219 49% 21%;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 219 41% 15%;
+  --foreground: 43 33% 96%;
+  --card: 219 45% 18%;
+  --card-foreground: 43 33% 96%;
+  --popover: 219 45% 18%;
+  --popover-foreground: 43 33% 96%;
+  --primary: 219 49% 30%;
+  --primary-foreground: 43 33% 96%;
+  --secondary: 219 35% 22%;
+  --secondary-foreground: 43 33% 96%;
+  --muted: 219 35% 22%;
+  --muted-foreground: 219 20% 65%;
+  --accent: 173 58% 39%;
+  --accent-foreground: 43 33% 96%;
+  --destructive: 8 74% 56%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 219 30% 25%;
+  --input: 219 30% 25%;
+  --ring: 36 79% 57%;
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: 'Cairo', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6, .font-heading {
+  font-family: 'Changa', 'Cairo', sans-serif;
+}
+

@@ -1,0 +1,20 @@
+{
+  "name": "@eduverse/mail",
+  "version": "1.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint src/**/*.ts --fix"
+  },
+  "dependencies": {
+    "nodemailer": "^6.9.14"
+  },
+  "devDependencies": {
+    "@eduverse/config": "*",
+    "@nestjs/common": "^10.4.1",
+    "@nestjs/core": "^10.4.1",
+    "@types/nodemailer": "^6.4.15"
+  }
+}

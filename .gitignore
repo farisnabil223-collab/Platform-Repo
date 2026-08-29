@@ -1,0 +1,44 @@
+# Dependency directories
+node_modules/
+jspm_packages/
+web_modules/
+
+# Build outputs and compilation artifacts
+dist/
+build/
+out/
+.next/
+.nx/cache/
+.tsbuildinfo
+*.tsbuildinfo
+
+# Debug logs and diagnostic reports
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
+
+# Local environment configuration overrides
+.env
+.env.*
+!.env.example
+dump.rdb
+uploads/
+brain/
+test-tailwind*.css
+
+
+# IDEs and editors configuration files
+.idea/
+.vscode/
+*.suo
+*.ntvsca
+*.njsproj
+*.sln
+*.sw?
+
+# OS and system files
+.DS_Store
+Thumbs.db

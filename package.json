@@ -1,0 +1,42 @@
+{
+  "name": "eduverse-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Enterprise Educational Platform EduVerse Monorepo Workspace",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "nx run-many --target=dev --all --parallel=10",
+    "build": "nx run-many --target=build --all --parallel=10",
+    "lint": "nx run-many --target=lint --all --parallel=10",
+    "test": "nx run-many --target=test --all --parallel=10",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md,yml,yaml,prisma}\"",
+    "clean": "rimraf node_modules **/dist **/.next **/out **/node_modules",
+    "prepare": "husky || true"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.9.0",
+    "@typescript-eslint/eslint-plugin": "^8.2.0",
+    "@typescript-eslint/parser": "^8.2.0",
+    "autoprefixer": "^10.5.4",
+    "eslint": "^9.9.0",
+    "husky": "^9.1.4",
+    "lint-staged": "^15.2.9",
+    "nx": "^19.6.2",
+    "postcss": "^8.5.24",
+    "prettier": "^3.3.3",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.5.4"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.5.7",
+    "@nestjs/passport": "^11.0.5",
+    "framer-motion": "^12.43.0",
+    "lucide-react": "^1.27.0",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "pino": "^10.3.1"
+  }
+}

@@ -1,0 +1,16 @@
+node_modules
+dist
+build
+out
+.next
+.nx
+.git
+.github
+.husky
+brain
+docs
+*.log
+.env.local
+.env.*.local
+.DS_Store
+Thumbs.db

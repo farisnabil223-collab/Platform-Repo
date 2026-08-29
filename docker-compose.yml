@@ -1,0 +1,142 @@
+version: '3.8'
+
+services:
+  # 1. PostgreSQL Database
+  postgres:
+    image: postgres:17-alpine
+    container_name: eduverse-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_secure_pass
+      POSTGRES_DB: eduverse
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 2. Redis Cache & Queue Backend
+  redis:
+    image: redis:7-alpine
+    container_name: eduverse-redis
+    restart: always
+    command: redis-server --requirepass redis_secure_pass
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "redis_secure_pass", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 3. OpenTelemetry Collector
+  otel-collector:
+    image: otel/opentelemetry-collector:latest
+    container_name: eduverse-otel-collector
+    restart: always
+    volumes:
+      - ./docker/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    ports:
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
+      - "8889:8889" # Prometheus metrics exporter
+
+  # 4. Prometheus Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: eduverse-prometheus
+    restart: always
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  # 5. Grafana Dashboard Visualizations
+  grafana:
+    image: grafana/grafana:latest
+    container_name: eduverse-grafana
+    restart: always
+    ports:
+      - "3002:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=grafana_secure_pass
+
+  # 6. NestJS API Core Engine
+  api:
+    build:
+      context: .
+      dockerfile: ./docker/api.Dockerfile
+    container_name: eduverse-api
+    restart: always
+    environment:
+      - PORT=4000
+      - NODE_ENV=production
+      - JWT_SECRET=super_secret_jwt_token_production_32chars_min_staging_secret
+      - STORAGE_DRIVER=s3
+      - S3_BUCKET=eduverse-staging-assets
+      - S3_REGION=us-east-1
+      - MAIL_DRIVER=smtp
+      - MAIL_HOST=email-smtp.us-east-1.amazonaws.com
+      - MAIL_PORT=587
+      - DATABASE_URL=postgresql://postgres:postgres_secure_pass@postgres:5432/eduverse?schema=public
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=redis_secure_pass
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318/v1/traces
+    ports:
+      - "4000:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # 7. Next.js Web Portal
+  web:
+    build:
+      context: .
+      dockerfile: ./docker/web.Dockerfile
+    container_name: eduverse-web
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+  # 8. Next.js Admin Portal
+  admin:
+    build:
+      context: .
+      dockerfile: ./docker/admin.Dockerfile
+    container_name: eduverse-admin
+    restart: always
+    ports:
+      - "3001:3001"
+    depends_on:
+      - api
+
+  # 9. Nginx Load Balancer / Routing Gateway
+  nginx:
+    image: nginx:alpine
+    container_name: eduverse-nginx
+    restart: always
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+    depends_on:
+      - web
+      - admin
+      - api
+
+volumes:
+  postgres_data:
+  redis_data:

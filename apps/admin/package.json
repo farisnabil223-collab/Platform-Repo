@@ -1,0 +1,31 @@
+{
+  "name": "@eduverse/admin",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3001",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint \"src/**/*.{ts,tsx}\" --fix --no-error-on-unmatched-pattern"
+  },
+  "dependencies": {
+    "@eduverse/ui": "*",
+    "@eduverse/design-tokens": "*",
+    "@eduverse/types": "*",
+    "@tanstack/react-query": "^5.51.23",
+    "next": "^15.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.52.2",
+    "zod": "^3.23.8",
+    "zustand": "^4.5.4"
+  },
+  "devDependencies": {
+    "@eduverse/config": "*",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "tailwindcss": "^3.4.10",
+    "typescript": "^5.5.4"
+  }
+}

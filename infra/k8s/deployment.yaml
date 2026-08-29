@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eduverse-api
+  labels:
+    app: eduverse-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: eduverse-api
+  template:
+    metadata:
+      labels:
+        app: eduverse-api
+    spec:
+      containers:
+      - name: api
+        image: eduverse-api:latest
+        ports:
+        - containerPort: 4000
+        envFrom:
+        - secretRef:
+            name: eduverse-secrets
+        - configMapRef:
+            name: eduverse-config
+        readinessProbe:
+          httpGet:
+            path: /api/v1/platform/health
+            port: 4000
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /api/v1/platform/health
+            port: 4000
+          initialDelaySeconds: 20
+          periodSeconds: 15

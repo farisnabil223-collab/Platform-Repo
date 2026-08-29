@@ -1,0 +1,18 @@
+{
+  "name": "@eduverse/shared-domain",
+  "version": "1.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint src/**/*.ts --fix"
+  },
+  "dependencies": {
+    "@eduverse/kernel": "*",
+    "decimal.js": "^10.4.3"
+  },
+  "devDependencies": {
+    "@eduverse/config": "*"
+  }
+}
