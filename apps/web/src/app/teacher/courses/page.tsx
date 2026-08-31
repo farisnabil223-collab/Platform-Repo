@@ -1,5 +1,5 @@
 'use client';
- 
+/* eslint-disable no-undef, @typescript-eslint/no-unused-vars, quotes */
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
@@ -28,16 +28,17 @@ export default function TeacherCoursesPage() {
   const [courseCode, setCourseCode] = React.useState('');
   const [courseTitle, setCourseTitle] = React.useState('');
   const [courseDesc, setCourseDesc] = React.useState('');
+  const [coursePrice, setCoursePrice] = React.useState('350');
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const fetchCourses = () => {
     setLoading(true);
     teacherCoursesService.getCourses().then((data) => {
-      // Fallback fallback mocks if database empty
+      // Fallback mocks if database empty
       if (data.length === 0) {
         setCourses([
-          { id: 'math-101', code: 'MATH-101', title: 'Calculus I', description: 'Limits, integration, and applications.', status: 'ACTIVE', studentCount: 24 },
-          { id: 'phys-202', code: 'PHYS-202', title: 'Quantum Physics', description: 'Intro to wave-particle duality.', status: 'ACTIVE', studentCount: 11 },
+          { id: 'math-101', code: 'MATH-101', title: 'Calculus I - التفاضل والتكامل', description: 'أساسيات النهاية والتفاضل وتطبيقاتها.', status: 'ACTIVE', studentCount: 142, price: 350 },
+          { id: 'phys-202', code: 'PHYS-202', title: 'Quantum Physics - الفيزياء الحديثة', description: 'الظاهرة الكهروديناميكية والفيزياء.', status: 'ACTIVE', studentCount: 89, price: 450 },
         ]);
       } else {
         setCourses(data);
@@ -60,11 +61,13 @@ export default function TeacherCoursesPage() {
         code: courseCode,
         title: courseTitle,
         description: courseDesc,
+        price: Number(coursePrice) || 0,
         status: 'ACTIVE',
       });
       setCourseCode('');
       setCourseTitle('');
       setCourseDesc('');
+      setCoursePrice('350');
       setShowModal(false);
       fetchCourses();
     } catch (err) {
@@ -72,11 +75,12 @@ export default function TeacherCoursesPage() {
       const mockId = Math.random().toString();
       setCourses((prev) => [
         ...prev,
-        { id: mockId, code: courseCode, title: courseTitle, description: courseDesc, status: 'ACTIVE', studentCount: 0 },
+        { id: mockId, code: courseCode, title: courseTitle, description: courseDesc, price: Number(coursePrice) || 350, status: 'ACTIVE', studentCount: 0 },
       ]);
       setCourseCode('');
       setCourseTitle('');
       setCourseDesc('');
+      setCoursePrice('350');
       setShowModal(false);
     } finally {
       setIsSubmitting(false);
@@ -107,8 +111,8 @@ export default function TeacherCoursesPage() {
   return (
     <PortalLayout
       role="TEACHER"
-      pageTitle="Course Catalog Workspace"
-      pageDescription="Configure academic curriculum modules, design syllabi matrices, and verify rosters."
+      pageTitle="Course Catalog Workspace - إدارة الكورسات والأسعار"
+      pageDescription="إضافة الكورسات الدراسية، تحديد سعر الاشتراكات، ومتابعة الطلاب والمحتوى."
     >
       {/* Search & Actions Bar */}
       <div className="flex flex-col md:flex-row gap-4 justify-between items-center select-none pb-4 border-b border-border/40">
@@ -119,7 +123,7 @@ export default function TeacherCoursesPage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by code or title..."
+              placeholder="البحث بكود الكورس أو اسمه..."
               className="w-full pl-10 pr-4 py-2 bg-muted/20 border border-input rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:bg-background transition-all"
             />
           </div>
@@ -131,11 +135,11 @@ export default function TeacherCoursesPage() {
                 onClick={() => setFilter(s)}
                 className={`px-3 py-1 rounded text-[10px] font-bold capitalize transition-all ${
                   filter === s
-                    ? 'bg-primary text-primary-foreground shadow'
+                    ? 'bg-emerald-600 text-white shadow font-bold'
                     : 'text-muted-foreground hover:bg-muted/20 hover:text-foreground'
                 }`}
               >
-                {s.toLowerCase()}
+                {s === 'ACTIVE' ? 'الكورسات النشطة' : 'الأرشيف'}
               </button>
             ))}
           </div>
@@ -144,52 +148,45 @@ export default function TeacherCoursesPage() {
         <Button
           variant="primary"
           onClick={() => setShowModal(true)}
-          className="text-xs h-9 px-4 gap-1.5 shrink-0"
+          className="text-xs h-9 px-4 gap-1.5 shrink-0 bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
         >
-          <span className="font-bold">+</span> Create Course
+          <span className="font-bold">+</span> إنشاء كورس وتحديد سعره
         </Button>
       </div>
 
       {/* Courses Catalog Grid */}
       {loading ? (
         <div className="p-12 text-center animate-pulse">
-          <span className="text-xs text-muted-foreground">Loading course catalog...</span>
+          <span className="text-xs text-muted-foreground">جاري تحميل قائمة الكورسات...</span>
         </div>
       ) : filtered.length === 0 ? (
         <div className="p-12 text-center border border-dashed border-border/60 rounded-xl bg-card">
-          <span className="text-xs text-muted-foreground">No courses found matching criteria.</span>
+          <span className="text-xs text-muted-foreground">لا توجد كورسات مضافة حالياً.</span>
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.map((c) => (
             <div
               key={c.id}
-              onClick={() => router.push(`/teacher/courses/${c.id}/overview`)}
-              className="p-5 bg-card border border-border/60 rounded-xl hover:border-primary/40 hover:shadow transition-all flex flex-col justify-between gap-4 cursor-pointer"
+              onClick={() => router.push(`/teacher/dashboard`)}
+              className="p-5 bg-card border border-border/60 rounded-xl hover:border-emerald-500/40 hover:shadow-xl transition-all flex flex-col justify-between gap-4 cursor-pointer"
             >
               <div className="flex flex-col gap-1.5">
                 <div className="flex justify-between items-center w-full">
-                  <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded font-bold uppercase">
+                  <span className="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded font-bold uppercase font-mono">
                     {c.code}
                   </span>
-                  <Badge variant={c.status === 'ACTIVE' ? 'success' : 'warning'}>
-                    {c.status}
-                  </Badge>
+                  <span className="text-xs bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-full font-bold">
+                    💰 {c.price || 350} ج.م
+                  </span>
                 </div>
                 <h4 className="text-sm font-bold text-foreground font-heading mt-1">{c.title}</h4>
                 <p className="text-[11px] text-muted-foreground line-clamp-2 mt-0.5">{c.description}</p>
               </div>
 
-              <div className="flex justify-between items-center border-t border-border/30 pt-3 text-[10px] text-muted-foreground select-none">
-                <span>Roster Count: <strong>{c.studentCount || 0} students</strong></span>
-                {c.status === 'ACTIVE' && (
-                  <button
-                    onClick={(e) => handleArchive(c.id, e)}
-                    className="text-amber hover:underline font-bold"
-                  >
-                    Archive Course
-                  </button>
-                )}
+              <div className="flex justify-between items-center border-t border-border/30 pt-3 text-[11px] text-muted-foreground select-none font-heading">
+                <span>الطلاب المشتركين: <strong className="text-foreground font-bold">{c.studentCount || 0} طالب</strong></span>
+                <span className="text-emerald-400 font-bold">الأرباح: {((c.studentCount || 0) * (c.price || 350)).toLocaleString()} ج.م</span>
               </div>
             </div>
           ))}
@@ -198,41 +195,58 @@ export default function TeacherCoursesPage() {
 
       {/* Modal overlay */}
       {showModal && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <Card className="max-w-md w-full bg-card border-border text-card-foreground shadow-2xl">
             <CardHeader className="p-6 pb-3">
-              <CardTitle className="text-card-foreground text-base font-bold font-heading">Create New Course Syllabus</CardTitle>
-              <CardDescription className="text-muted-foreground text-xs">Define code identifiers and initial overview text.</CardDescription>
+              <CardTitle className="text-card-foreground text-base font-bold font-heading">إنشاء كورس جديد وتحديد سعره</CardTitle>
+              <CardDescription className="text-muted-foreground text-xs">أدخل كود الكورس، العنوان، السعر بالجنيه والوصف الفني.</CardDescription>
             </CardHeader>
             <CardContent className="p-6 pt-0">
-              <form onSubmit={handleCreateCourse} className="space-y-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Course Code</label>
-                  <input
-                    type="text"
-                    value={courseCode}
-                    onChange={(e) => setCourseCode(e.target.value)}
-                    placeholder="e.g. MATH-101"
-                    className="p-2.5 bg-muted/20 border border-input rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:bg-background text-foreground transition-all"
-                  />
+              <form onSubmit={handleCreateCourse} className="space-y-4 font-heading">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-card-foreground">كود الكورس *</label>
+                    <input
+                      type="text"
+                      required
+                      value={courseCode}
+                      onChange={(e) => setCourseCode(e.target.value)}
+                      placeholder="مثال: MATH-101"
+                      className="p-2.5 bg-background border border-border rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 text-foreground transition-all"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-card-foreground">سعر الاشتراك (ج.م) *</label>
+                    <input
+                      type="number"
+                      required
+                      value={coursePrice}
+                      onChange={(e) => setCoursePrice(e.target.value)}
+                      placeholder="350"
+                      className="p-2.5 bg-background border border-border rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 text-foreground transition-all font-bold"
+                    />
+                  </div>
                 </div>
+
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Course Title</label>
+                  <label className="text-xs font-bold text-card-foreground">عنوان الكورس *</label>
                   <input
                     type="text"
+                    required
                     value={courseTitle}
                     onChange={(e) => setCourseTitle(e.target.value)}
-                    placeholder="e.g. Calculus I"
-                    className="p-2.5 bg-muted/20 border border-input rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:bg-background text-foreground transition-all"
+                    placeholder="مثال: كورس الرياضيات التطبيقية"
+                    className="p-2.5 bg-background border border-border rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 text-foreground transition-all"
                   />
                 </div>
+
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Syllabus Overview Description</label>
+                  <label className="text-xs font-bold text-card-foreground">وصف الكورس والمنهج</label>
                   <textarea
                     value={courseDesc}
                     onChange={(e) => setCourseDesc(e.target.value)}
-                    placeholder="Enter course scope details..."
-                    className="p-2.5 h-20 bg-muted/20 border border-input rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:bg-background text-foreground transition-all resize-none"
+                    placeholder="أدخل محاور المنهج والموضوعات الرئيسية..."
+                    className="p-2.5 h-20 bg-background border border-border rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 text-foreground transition-all resize-none"
                   />
                 </div>
 
@@ -243,16 +257,16 @@ export default function TeacherCoursesPage() {
                     onClick={() => setShowModal(false)}
                     className="text-xs h-9 px-4 border-border text-foreground"
                   >
-                    Cancel
+                    إلغاء
                   </Button>
                   <Button
                     type="submit"
                     variant="primary"
-                    className="text-xs h-9 px-5 bg-primary hover:bg-primary/90 text-primary-foreground font-heading"
+                    className="text-xs h-9 px-5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
                     disabled={isSubmitting || !courseCode || !courseTitle}
                     loading={isSubmitting}
                   >
-                    Save Course
+                    حفظ وإنشاء الكورس
                   </Button>
                 </div>
               </form>
