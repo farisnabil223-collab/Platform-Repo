@@ -1,6 +1,6 @@
 import { Body, Controller, Post, Req, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { RegisterHandler } from '../application/commands/register.handler';
 import { LoginHandler } from '../application/commands/login.handler';
 import { RefreshHandler } from '../application/commands/refresh.handler';
