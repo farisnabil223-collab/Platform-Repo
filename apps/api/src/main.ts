@@ -1,4 +1,4 @@
-// 1. Initialize OpenTelemetry tracing SDK before other modules load
+// 1. Initialize OpenTelemetry tracing SDK before other modules load - Vercel API deployment
 import { otelSDK } from './otel';
 otelSDK.start();
 
@@ -111,7 +111,7 @@ async function bootstrap() {
     .setVersion('1.0.0')
     .addBearerAuth()
     .build();
-  
+
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup(`${prefix}/docs`, app, document);
 
