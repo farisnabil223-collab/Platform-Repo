@@ -115,7 +115,7 @@ export const PortalLayout: React.FC<PortalLayoutProps> = ({
       </a>
 
       {/* SIDEBAR - DESKTOP */}
-      <aside className="hidden lg:flex flex-col w-[260px] border-r border-border/60 bg-card select-none">
+      <aside className="hidden lg:flex flex-col w-[260px] border-r border-border/60 bg-card select-none sticky top-0 h-screen shrink-0 z-30 overflow-hidden">
         {/* Logo and branding */}
         <div className="h-16 px-6 border-b border-border/40 flex items-center gap-3">
           <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-black font-heading text-lg">
