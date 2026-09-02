@@ -71,9 +71,12 @@ export default function TeacherCoursesPage() {
         code: courseCode,
         title: courseTitle,
         description: courseDesc,
+        subject: selectedSubject,
+        category: selectedSubject,
         price: Number(coursePrice) || 0,
         originalPrice: Number(courseOriginalPrice) || undefined,
         status: 'ACTIVE',
+        instructorName: 'د. مدرس المادة',
       });
       setCourseCode('');
       setCourseTitle('');
@@ -83,18 +86,13 @@ export default function TeacherCoursesPage() {
       setShowModal(false);
       fetchCourses();
     } catch (err) {
-      // Fallback push to local state
-      const mockId = Math.random().toString();
-      setCourses((prev) => [
-        ...prev,
-        { id: mockId, code: courseCode, title: courseTitle, description: courseDesc, price: Number(coursePrice) || 350, originalPrice: Number(courseOriginalPrice) || 500, status: 'ACTIVE', studentCount: 0 },
-      ]);
       setCourseCode('');
       setCourseTitle('');
       setCourseDesc('');
       setCoursePrice('350');
       setCourseOriginalPrice('500');
       setShowModal(false);
+      fetchCourses();
     } finally {
       setIsSubmitting(false);
     }

@@ -20,39 +20,73 @@ import { teacherCoursesService } from '../../../services/teacherCoursesService';
 export default function TeacherDashboardPage() {
   const router = useRouter();
   
-  // Teacher Courses State with Enrolled Students & Prices
-  const [courses, setCourses] = React.useState([
+  // Teacher Courses State
+  const [courses, setCourses] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  const DEFAULT_MOCK_COURSES = [
     {
       id: 'c1',
       title: 'كورس الرياضيات للثانوية العامة - التفاضل والتكامل',
       code: 'MATH-101',
-      price: 350, // EGP
+      price: 350,
       enrolledCount: 142,
       lessonsCount: 18,
       status: 'PUBLISHED',
       category: 'الرياضيات',
+      instructorName: 'د. مدرس المادة',
     },
     {
       id: 'c2',
       title: 'كورس الفيزياء الطبية والميكانيكا',
       code: 'PHYS-201',
-      price: 450, // EGP
+      price: 450,
       enrolledCount: 89,
       lessonsCount: 12,
       status: 'PUBLISHED',
       category: 'الفيزياء',
+      instructorName: 'د. مدرس المادة',
     },
     {
       id: 'c3',
       title: 'كورس الكيمياء العضوية الشامل',
       code: 'CHEM-301',
-      price: 300, // EGP
+      price: 300,
       enrolledCount: 210,
       lessonsCount: 24,
       status: 'PUBLISHED',
       category: 'الكيمياء',
+      instructorName: 'د. مدرس المادة',
     },
-  ]);
+  ];
+
+  const loadTeacherCourses = React.useCallback(() => {
+    teacherCoursesService.getCourses().then((stored) => {
+      if (stored && stored.length > 0) {
+        const mapped = stored.map((c: any) => ({
+          ...c,
+          enrolledCount: c.studentsCount || c.enrolledCount || 50,
+          lessonsCount: c.lessons?.length || c.lessonsCount || 10,
+          price: c.price ?? 350,
+        }));
+        setCourses(mapped);
+      } else {
+        setCourses(DEFAULT_MOCK_COURSES);
+      }
+      setLoading(false);
+    }).catch(() => {
+      setCourses(DEFAULT_MOCK_COURSES);
+      setLoading(false);
+    });
+  }, []);
+
+  React.useEffect(() => {
+    loadTeacherCourses();
+    window.addEventListener('eduverse-courses-updated', loadTeacherCourses);
+    return () => {
+      window.removeEventListener('eduverse-courses-updated', loadTeacherCourses);
+    };
+  }, [loadTeacherCourses]);
 
   // Modal State for Adding Lessons directly
   const [selectedCourseForLesson, setSelectedCourseForLesson] = React.useState<any | null>(null);
@@ -63,8 +97,6 @@ export default function TeacherDashboardPage() {
     description: '',
     duration: '45',
   });
-
-  const [loading, setLoading] = React.useState(false);
 
   // Compute Total Metrics
   const totalEnrolledStudents = courses.reduce((sum, c) => sum + c.enrolledCount, 0);

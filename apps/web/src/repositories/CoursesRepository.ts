@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { BaseRepository } from './BaseRepository';
 import api from '../services/api';
 
@@ -104,38 +105,81 @@ const FALLBACK_COURSES: Course[] = [
   },
 ];
 
+const CUSTOM_COURSES_KEY = 'eduverse_custom_courses';
+
+export function getStoredCustomCourses(): Course[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(CUSTOM_COURSES_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+export function saveStoredCustomCourse(course: Course): Course {
+  if (typeof window === 'undefined') return course;
+  try {
+    const existing = getStoredCustomCourses();
+    const updated = [course, ...existing.filter((c) => c.id !== course.id && c.slug !== course.slug)];
+    localStorage.setItem(CUSTOM_COURSES_KEY, JSON.stringify(updated));
+    window.dispatchEvent(new Event('eduverse-courses-updated'));
+    return course;
+  } catch (e) {
+    return course;
+  }
+}
+
 class CoursesRepository extends BaseRepository {
   async getAll(): Promise<Course[]> {
+    const customCourses = getStoredCustomCourses();
     try {
       const response = await api.get<any>('/public/courses');
       if (response && response.data?.items && response.data.items.length > 0) {
-        return response.data.items;
+        const combined = [...customCourses, ...response.data.items];
+        const uniqueMap = new Map();
+        combined.forEach(c => uniqueMap.set(c.id || c.slug, c));
+        return Array.from(uniqueMap.values());
       }
-      return FALLBACK_COURSES;
     } catch (error) {
       this.handleError('getAllCourses', error);
-      return FALLBACK_COURSES;
     }
+
+    const combined = [...customCourses, ...FALLBACK_COURSES];
+    const uniqueMap = new Map();
+    combined.forEach(c => uniqueMap.set(c.id || c.slug, c));
+    return Array.from(uniqueMap.values());
   }
 
   async getBySlug(slug: string): Promise<Course | null> {
+    const allCourses = await this.getAll();
+    const found = allCourses.find(c => c.slug === slug || c.code === slug || c.id === slug);
+    if (found) return found;
+
     try {
       const response = await api.get<any>(`/public/courses/${slug}`);
       if (response && response.data) {
         return response.data;
       }
-      return FALLBACK_COURSES.find(c => c.slug === slug || c.code === slug || c.id === slug) || FALLBACK_COURSES[0];
     } catch (error) {
       this.handleError(`getCourseBySlug(${slug})`, error);
-      return FALLBACK_COURSES.find(c => c.slug === slug || c.code === slug || c.id === slug) || FALLBACK_COURSES[0];
     }
+
+    return FALLBACK_COURSES.find(c => c.slug === slug || c.code === slug || c.id === slug) || FALLBACK_COURSES[0];
   }
 
   async getFeatured(): Promise<Course[]> {
     const courses = await this.getAll();
     return courses.slice(0, 3);
   }
+
+  saveCourse(course: Course): Course {
+    return saveStoredCustomCourse(course);
+  }
 }
 
 export const coursesRepository = new CoursesRepository();
 export default coursesRepository;
+

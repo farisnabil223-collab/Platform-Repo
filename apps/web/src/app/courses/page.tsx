@@ -77,18 +77,44 @@ export default function PublicCoursesPage() {
   const itemsPerPage = 6;
 
   useEffect(() => {
-    Promise.all([
-      coursesRepository.getAll(),
-      teachersRepository.getAll(),
-    ]).then(([allCourses, allTeachers]) => {
-      if (allCourses && allCourses.length > 0) setCourses(allCourses);
-      if (allTeachers && allTeachers.length > 0) setTeachers(allTeachers);
-      setLoading(false);
-    }).catch(() => setLoading(false));
+    const loadData = () => {
+      Promise.all([
+        coursesRepository.getAll(),
+        teachersRepository.getAll(),
+      ]).then(([allCourses, allTeachers]) => {
+        if (allCourses && allCourses.length > 0) setCourses(allCourses);
+        if (allTeachers && allTeachers.length > 0) setTeachers(allTeachers);
+        setLoading(false);
+      }).catch(() => setLoading(false));
+    };
+
+    loadData();
+    window.addEventListener('eduverse-courses-updated', loadData);
+    window.addEventListener('storage', loadData);
+    return () => {
+      window.removeEventListener('eduverse-courses-updated', loadData);
+      window.removeEventListener('storage', loadData);
+    };
   }, []);
 
-  const categories = ['All', 'Science', 'Mathematics', 'Humanities', 'Tech'];
-  const grades = ['All', 'Beginner', 'Intermediate', 'Advanced', 'All Levels'];
+  const categories = useMemo(() => {
+    const defaultList = ['All', 'Science', 'Mathematics', 'Humanities', 'Tech', 'الرياضيات', 'الفيزياء', 'الكيمياء'];
+    const extracted = courses.map((c) => c.category).filter(Boolean);
+    return Array.from(new Set([...defaultList, ...extracted]));
+  }, [courses]);
+
+  const teacherOptions = useMemo(() => {
+    const map = new Map<string, string>();
+    teachers.forEach(t => map.set(t.id, t.name));
+    courses.forEach(c => {
+      if (c.instructorName) {
+        map.set(c.instructorId || c.instructorName, c.instructorName);
+      }
+    });
+    return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
+  }, [teachers, courses]);
+
+  const grades = ['All', 'Beginner', 'Intermediate', 'Advanced', 'All Levels', 'جامعي / ثانوي', 'Grade 11 - University', 'Grade 12 - University'];
   const prices = ['All', 'Free', 'Paid'];
 
   const filteredCourses = useMemo(() => {
@@ -97,11 +123,11 @@ export default function PublicCoursesPage() {
         const matchesSearch =
           c.title.toLowerCase().includes(search.toLowerCase()) ||
           c.code.toLowerCase().includes(search.toLowerCase()) ||
-          c.description.toLowerCase().includes(search.toLowerCase());
+          (c.description && c.description.toLowerCase().includes(search.toLowerCase()));
         const matchesCategory =
           selectedCategory === 'All' || c.category === selectedCategory;
         const matchesTeacher =
-          selectedTeacher === 'All' || c.instructorId === selectedTeacher;
+          selectedTeacher === 'All' || c.instructorId === selectedTeacher || c.instructorName === selectedTeacher;
         const matchesGrade =
           selectedGrade === 'All' || c.gradeLevel === selectedGrade;
         
@@ -117,9 +143,9 @@ export default function PublicCoursesPage() {
       .sort((a, b) => {
         if (sortBy === 'price-low') return a.price - b.price;
         if (sortBy === 'price-high') return b.price - a.price;
-        if (sortBy === 'rating') return b.rating - a.rating;
+        if (sortBy === 'rating') return (b.rating || 5) - (a.rating || 5);
         // Default: popularity by studentsCount
-        return b.studentsCount - a.studentsCount;
+        return (b.studentsCount || 0) - (a.studentsCount || 0);
       });
   }, [courses, search, selectedCategory, selectedTeacher, selectedGrade, selectedPrice, sortBy]);
 
@@ -215,7 +241,7 @@ export default function PublicCoursesPage() {
                 className="px-3 py-2 bg-background border border-input rounded-xl text-xs text-foreground focus:outline-none"
               >
                 <option value="All">All Teachers</option>
-                {teachers.map((t) => (
+                {teacherOptions.map((t) => (
                   <option key={t.id} value={t.id}>{t.name}</option>
                 ))}
               </select>
