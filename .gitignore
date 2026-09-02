@@ -8,7 +8,7 @@ dist/
 build/
 out/
 .next/
-.nx/cache/
+.nx/
 .tsbuildinfo
 *.tsbuildinfo
 
