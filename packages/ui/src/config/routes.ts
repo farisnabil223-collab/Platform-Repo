@@ -158,11 +158,32 @@ export const PORTAL_ROUTES: Record<'STUDENT' | 'TEACHER' | 'PARENT' | 'ADMIN', R
       seo: { title: 'Admin Overview', description: 'Observe server statuses.' },
     },
     {
+      path: '/subjects',
+      title: 'إدارة المواد (Subjects)',
+      icon: 'courses',
+      layout: 'portal',
+      seo: { title: 'Platform Subjects', description: 'Create and manage platform subjects.' },
+    },
+    {
       path: '/users',
       title: 'Users Directory',
       icon: 'user',
       layout: 'portal',
       seo: { title: 'User Management', description: 'Configure permissions.' },
+    },
+    {
+      path: '/analytics',
+      title: 'Business Intelligence',
+      icon: 'activity',
+      layout: 'portal',
+      seo: { title: 'Analytics', description: 'View business metrics.' },
+    },
+    {
+      path: '/financial',
+      title: 'Financial Ledger',
+      icon: 'billing',
+      layout: 'portal',
+      seo: { title: 'Financials', description: 'Tuition revenue & invoices.' },
     },
     {
       path: '/audit',

@@ -46,6 +46,12 @@ export default function AdminPage() {
 
   const quickActions = [
     {
+      id: 'subjects',
+      label: '📚 إدارة وإنشاء المواد الدراسية (Subjects)',
+      description: 'إضافة مادة جديدة في المنصة وفتح سيكشن أوتوماتيكي للطلاب.',
+      action: () => (window.location.href = '/subjects'),
+    },
+    {
       id: 'palette',
       label: 'Open Command Palette',
       description: 'Trigger Cmd+K search box.',
@@ -60,9 +66,10 @@ export default function AdminPage() {
   ];
 
   const commands = [
-    { id: 'c1', label: 'Go to User Admin', category: 'Navigation', action: () => alert('Navigating to user management...') },
-    { id: 'c2', label: 'Open Billing Gate', category: 'Navigation', action: () => alert('Navigating to billing gateway...') },
-    { id: 'c3', label: 'System Health Diagnostics', category: 'Operation', action: () => alert('Triggering network diagnostics check...') },
+    { id: 'c0', label: 'إدارة المواد الدراسية (Subjects)', category: 'Navigation', action: () => (window.location.href = '/subjects') },
+    { id: 'c1', label: 'Go to User Admin', category: 'Navigation', action: () => (window.location.href = '/users') },
+    { id: 'c2', label: 'Open Billing Gate', category: 'Navigation', action: () => (window.location.href = '/financial') },
+    { id: 'c3', label: 'System Health Diagnostics', category: 'Operation', action: () => (window.location.href = '/system') },
   ];
 
   return (
