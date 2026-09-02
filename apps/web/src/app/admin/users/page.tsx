@@ -4,6 +4,8 @@
 import React from 'react';
 import { PortalLayout, Button, Badge } from '@eduverse/ui';
 
+import { teachersRepository } from '../../../repositories/TeachersRepository';
+
 interface UserItem {
   id: string;
   name: string;
@@ -40,8 +42,35 @@ export default function AdminUsersPage() {
       return;
     }
 
+    const teacherSlug = newTeacherForm.name
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-') || `tch-${Date.now()}`;
+
+    const newTeacherId = `t_${Date.now()}`;
+
+    teachersRepository.saveTeacher({
+      id: newTeacherId,
+      slug: teacherSlug,
+      name: newTeacherForm.name,
+      email: newTeacherForm.email,
+      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop&q=80',
+      bio: `مدرس مادة ${newTeacherForm.subject} المعين من الإدارة العليا.`,
+      detailedBio: `استشاري ومدرس مادة ${newTeacherForm.subject} المعين رسمياً من إدارة المنصة لإلقاء الشروحات وتصحيح الاختبارات والواجبات المنهجية.`,
+      specialties: [newTeacherForm.subject],
+      qualifications: [`بكالوريوس وتخصص ${newTeacherForm.subject}`, 'معتمد رسمياً من الإدارة التعليمية'],
+      certificates: ['شهادة اعتماد التدريس الرقمي من المنصة'],
+      experienceYears: 8,
+      rating: 5.0,
+      reviewsCount: 0,
+      studentsCount: 0,
+      verifiedBadge: true,
+      subject: newTeacherForm.subject,
+    });
+
     const newTeacher = {
-      id: (users.length + 1).toString(),
+      id: newTeacherId,
       name: newTeacherForm.name,
       email: newTeacherForm.email,
       role: 'TEACHER',
@@ -52,7 +81,7 @@ export default function AdminUsersPage() {
     setUsers((prev) => [newTeacher, ...prev]);
     setShowCreateTeacherModal(false);
     setNewTeacherForm({ name: '', email: '', subject: 'الرياضيات', password: '', phone: '' });
-    alert(`تم إنشاء حساب المدرس بنجاح! يمكنه الآن تسجيل الدخول وحساب أرباحه.`);
+    alert(`تم إنشاء حساب المدرس "${newTeacherForm.name}" بنجاح! يمكنه الآن نشر فيديوهاته وكورساته.`);
   };
 
   const handleCsvImportSimulate = () => {

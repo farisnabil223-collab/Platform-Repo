@@ -12,10 +12,20 @@ export default function TeachersDirectoryPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    teachersRepository.getAll().then((data) => {
-      setTeachers(data);
-      setLoading(false);
-    });
+    const loadTeachers = () => {
+      teachersRepository.getAll().then((data) => {
+        setTeachers(data);
+        setLoading(false);
+      });
+    };
+
+    loadTeachers();
+    window.addEventListener('eduverse-teachers-updated', loadTeachers);
+    window.addEventListener('storage', loadTeachers);
+    return () => {
+      window.removeEventListener('eduverse-teachers-updated', loadTeachers);
+      window.removeEventListener('storage', loadTeachers);
+    };
   }, []);
 
   return (

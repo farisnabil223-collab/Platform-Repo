@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import PublicLayout from '../../../components/PublicLayout';
 import Rating from '../../../components/ui/Rating';
 import CourseCard from '../../../components/ui/CourseCard';
-import { teachersRepository } from '../../../repositories/TeachersRepository';
+import { teachersRepository, Teacher } from '../../../repositories/TeachersRepository';
 import { coursesRepository } from '../../../repositories/CoursesRepository';
 import { Button, Card, Avatar } from '@eduverse/ui';
 import { GraduationCap, ShieldAlert, Award } from 'lucide-react';
@@ -64,7 +64,6 @@ const Github = ({ size = 24, ...props }: React.ComponentPropsWithoutRef<'svg'> &
   </svg>
 );
 
-
 interface Params {
   slug: string;
 }
@@ -73,31 +72,42 @@ export default function TeacherProfilePage({ params }: { params: Promise<Params>
   const resolvedParams = use(params);
   const router = useRouter();
 
-  const [teacher, setTeacher] = useState<any | null>(null);
+  const [teacher, setTeacher] = useState<Teacher | null>(null);
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    teachersRepository.getBySlug(resolvedParams.slug).then((data) => {
-      setTeacher(data);
-      if (data) {
-        coursesRepository.getAll().then((allCourses) => {
-          // Filter courses taught by this teacher
-          const teacherCourses = allCourses.filter(
-            (c) => c.instructorId === data.id || c.instructorName === data.name
-          );
-          setCourses(teacherCourses);
-        });
-      }
-      setLoading(false);
-    });
+    const loadTeacherData = () => {
+      teachersRepository.getBySlug(resolvedParams.slug).then((data) => {
+        setTeacher(data);
+        if (data) {
+          coursesRepository.getAll().then((allCourses) => {
+            const teacherCourses = allCourses.filter((c) => {
+              if (c.instructorId && c.instructorId === data.id) return true;
+              if (c.instructorName && data.name && c.instructorName.toLowerCase().trim() === data.name.toLowerCase().trim()) return true;
+              if (c.instructorId && data.slug && c.instructorId === data.slug) return true;
+              if (data.subject && c.category && c.category.toLowerCase() === data.subject.toLowerCase()) return true;
+              return false;
+            });
+            setCourses(teacherCourses);
+          });
+        }
+        setLoading(false);
+      });
+    };
+
+    loadTeacherData();
+    window.addEventListener('eduverse-courses-updated', loadTeacherData);
+    return () => {
+      window.removeEventListener('eduverse-courses-updated', loadTeacherData);
+    };
   }, [resolvedParams.slug]);
 
   if (loading) {
     return (
       <PublicLayout>
         <div className="h-96 flex items-center justify-center animate-pulse">
-          <span className="text-xs text-slate-500">Loading teacher credentials...</span>
+          <span className="text-xs text-muted-foreground font-heading">Loading teacher credentials...</span>
         </div>
       </PublicLayout>
     );
@@ -107,26 +117,40 @@ export default function TeacherProfilePage({ params }: { params: Promise<Params>
     return (
       <PublicLayout>
         <div className="py-20 text-center space-y-4">
-          <ShieldAlert className="mx-auto text-red-500" size={32} />
-          <h2 className="text-xl font-bold font-heading text-white">Instructor Not Found</h2>
-          <p className="text-xs text-slate-400">The requested teacher profile record does not exist.</p>
+          <ShieldAlert className="mx-auto text-destructive" size={32} />
+          <h2 className="text-xl font-bold font-heading text-foreground">Instructor Not Found</h2>
+          <p className="text-xs text-muted-foreground">The requested teacher profile record does not exist.</p>
           <Button variant="primary" onClick={() => router.push('/teachers')}>Back to Directory</Button>
         </div>
       </PublicLayout>
     );
   }
 
+  const socialLinks = teacher.socials || teacher.socialLinks || {};
+  const specialtiesList = teacher.specialties && teacher.specialties.length > 0
+    ? teacher.specialties
+    : [teacher.subject || 'المادة الأكاديمية'];
+  const qualificationsList = Array.isArray(teacher.qualifications)
+    ? teacher.qualifications
+    : teacher.qualifications
+    ? [teacher.qualifications]
+    : ['Ph.D. / دكتوراة التخصص الأكاديمي', 'عضو هيئة التدريس والأبحاث بالمؤسسة التعليمية'];
+  const certificatesList = teacher.certificates || [
+    'وسام التميز في التدريس الرقمي والأكاديمي',
+    'شهادة اعتماد المناهج الدراسية المتقدمة',
+  ];
+
   return (
     <PublicLayout>
       <div className="space-y-12 select-none animate-fade-in">
         
         {/* Breadcrumbs */}
-        <div className="text-[10px] text-slate-500 uppercase tracking-widest font-black flex items-center gap-1.5">
-          <span className="hover:text-white cursor-pointer" onClick={() => router.push('/')}>Home</span>
+        <div className="text-[10px] text-muted-foreground uppercase tracking-widest font-black flex items-center gap-1.5 font-heading">
+          <span className="hover:text-foreground cursor-pointer" onClick={() => router.push('/')}>Home</span>
           <span>/</span>
-          <span className="hover:text-white cursor-pointer" onClick={() => router.push('/teachers')}>Teachers</span>
+          <span className="hover:text-foreground cursor-pointer" onClick={() => router.push('/teachers')}>Teachers</span>
           <span>/</span>
-          <span className="text-indigo-400">{teacher.name}</span>
+          <span className="text-primary font-bold">{teacher.name}</span>
         </div>
 
         {/* Profile Card Header */}
@@ -135,16 +159,16 @@ export default function TeacherProfilePage({ params }: { params: Promise<Params>
           {/* Detailed Bio (Left 2 Columns) */}
           <div className="lg:col-span-2 space-y-8">
             <div className="flex flex-col sm:flex-row gap-5 items-start">
-              <Avatar className="h-20 w-20 rounded-full border border-slate-800 bg-indigo-900/40 text-indigo-300 font-bold text-2xl flex items-center justify-center shrink-0">
+              <Avatar className="h-20 w-20 rounded-full border border-border bg-primary/10 text-primary font-bold text-2xl flex items-center justify-center shrink-0">
                 {teacher.avatar || teacher.name.charAt(0)}
               </Avatar>
               <div className="space-y-2">
-                <h1 className="text-2xl md:text-3xl font-extrabold font-heading text-white tracking-tight">
+                <h1 className="text-2xl md:text-3xl font-extrabold font-heading text-foreground tracking-tight">
                   {teacher.name}
                 </h1>
                 <div className="flex flex-wrap gap-2 pt-1">
-                  {teacher.specialties.map((s: string) => (
-                    <span key={s} className="text-[9px] bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2.5 py-0.5 rounded-full font-bold">
+                  {specialtiesList.map((s: string) => (
+                    <span key={s} className="text-[9px] bg-primary/10 text-primary border border-primary/20 px-2.5 py-0.5 rounded-full font-bold">
                       {s}
                     </span>
                   ))}
@@ -153,19 +177,19 @@ export default function TeacherProfilePage({ params }: { params: Promise<Params>
             </div>
 
             <div className="space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">Biography Summary</h3>
-              <p className="text-xs md:text-sm text-slate-400 leading-relaxed">
-                {teacher.detailedBio}
+              <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground font-heading">Biography Summary</h3>
+              <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">
+                {teacher.detailedBio || teacher.bio || 'مدرس أكاديمي متخصص معتمد في المنصة لإعداد ونشر الكورسات والمقررات الدراسية الشاملة للطلاب.'}
               </p>
             </div>
 
             {/* Qualifications */}
             <div className="space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">Qualifications & Education</h3>
-              <ul className="space-y-2 text-xs text-slate-400">
-                {teacher.qualifications.map((q: string, idx: number) => (
+              <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground font-heading">Qualifications & Education</h3>
+              <ul className="space-y-2 text-xs text-muted-foreground">
+                {qualificationsList.map((q: string, idx: number) => (
                   <li key={idx} className="flex items-start gap-2">
-                    <GraduationCap size={14} className="text-indigo-400 mt-0.5 shrink-0" />
+                    <GraduationCap size={14} className="text-primary mt-0.5 shrink-0" />
                     <span>{q}</span>
                   </li>
                 ))}
@@ -174,11 +198,11 @@ export default function TeacherProfilePage({ params }: { params: Promise<Params>
 
             {/* Certification / Awards */}
             <div className="space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">Honors & Certifications</h3>
-              <ul className="space-y-2 text-xs text-slate-400">
-                {teacher.certificates.map((c: string, idx: number) => (
+              <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground font-heading">Honors & Certifications</h3>
+              <ul className="space-y-2 text-xs text-muted-foreground">
+                {certificatesList.map((c: string, idx: number) => (
                   <li key={idx} className="flex items-start gap-2">
-                    <Award size={14} className="text-emerald-400 mt-0.5 shrink-0" />
+                    <Award size={14} className="text-teal mt-0.5 shrink-0" />
                     <span>{c}</span>
                   </li>
                 ))}
@@ -186,8 +210,17 @@ export default function TeacherProfilePage({ params }: { params: Promise<Params>
             </div>
 
             {/* Courses Taught */}
-            <div className="space-y-4 pt-4 border-t border-slate-800/40">
-              <h3 className="text-sm font-bold font-heading text-white uppercase tracking-wider">Courses Taught</h3>
+            <div className="space-y-4 pt-4 border-t border-border">
+              <div className="flex justify-between items-center">
+                <h3 className="text-sm font-bold font-heading text-foreground uppercase tracking-wider">
+                  Courses Taught ({courses.length})
+                </h3>
+                {courses.length > 0 && (
+                  <span className="text-xs text-teal font-bold bg-teal/10 border border-teal/20 px-2.5 py-0.5 rounded-full">
+                    مدرس ينشر المحتوى والمحاضرات
+                  </span>
+                )}
+              </div>
               {courses.length > 0 ? (
                 <div className="grid sm:grid-cols-2 gap-6">
                   {courses.map((course) => (
@@ -195,77 +228,79 @@ export default function TeacherProfilePage({ params }: { params: Promise<Params>
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-slate-500">No active public courses assigned currently.</p>
+                <div className="p-8 text-center border border-dashed border-border rounded-2xl bg-card">
+                  <p className="text-xs text-muted-foreground font-heading">لم يقم المدرس بنشر كورسات حالياً أو جارٍ إضافة المحتوى الفيديوي.</p>
+                </div>
               )}
             </div>
           </div>
 
           {/* Stats & Contacts Panel (Right Column) */}
           <div className="space-y-6">
-            <Card className="bg-slate-900/80 border border-slate-800 p-6 rounded-3xl space-y-6 shadow-2xl">
-              <h3 className="text-xs font-bold font-heading text-white uppercase tracking-wider">Teaching Portfolio</h3>
+            <Card className="bg-card border border-border p-6 rounded-3xl space-y-6 shadow-2xl">
+              <h3 className="text-xs font-bold font-heading text-card-foreground uppercase tracking-wider">Teaching Portfolio</h3>
               
               <div className="grid grid-cols-2 gap-4 text-center">
-                <div className="p-3 bg-slate-950 border border-slate-800 rounded-xl">
-                  <span className="text-xl font-black font-heading text-white block">
-                    {teacher.experienceYears}+
+                <div className="p-3 bg-background border border-border rounded-xl">
+                  <span className="text-xl font-black font-heading text-foreground block">
+                    {teacher.experienceYears || 5}+
                   </span>
-                  <span className="text-[9px] uppercase tracking-wider text-slate-500">Years Exp</span>
+                  <span className="text-[9px] uppercase tracking-wider text-muted-foreground">Years Exp</span>
                 </div>
-                <div className="p-3 bg-slate-950 border border-slate-800 rounded-xl">
-                  <span className="text-xl font-black font-heading text-white block">
-                    {teacher.studentsCount.toLocaleString()}
+                <div className="p-3 bg-background border border-border rounded-xl">
+                  <span className="text-xl font-black font-heading text-foreground block">
+                    {(teacher.studentsCount || 0).toLocaleString()}
                   </span>
-                  <span className="text-[9px] uppercase tracking-wider text-slate-500">Students</span>
+                  <span className="text-[9px] uppercase tracking-wider text-muted-foreground">Students</span>
                 </div>
               </div>
 
-              <div className="space-y-3.5 border-t border-slate-800/60 pt-4 text-xs text-slate-400">
+              <div className="space-y-3.5 border-t border-border pt-4 text-xs text-muted-foreground">
                 <div className="flex justify-between items-center">
                   <span>Aggregate Rating:</span>
                   <div className="flex items-center gap-1">
-                    <Rating value={teacher.rating} size={12} />
-                    <span className="text-white font-bold">{teacher.rating.toFixed(1)}</span>
+                    <Rating value={teacher.rating || 5.0} size={12} />
+                    <span className="text-foreground font-bold">{(teacher.rating || 5.0).toFixed(1)}</span>
                   </div>
                 </div>
                 <div className="flex justify-between items-center">
                   <span>Reviews Received:</span>
-                  <span className="text-white font-bold">{teacher.reviewsCount}</span>
+                  <span className="text-foreground font-bold">{teacher.reviewsCount || 0}</span>
                 </div>
               </div>
 
               {/* Social Contacts */}
-              <div className="border-t border-slate-800/60 pt-4 space-y-3">
-                <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold block">Social Links</span>
-                <div className="flex gap-3 text-slate-400">
-                  {teacher.socialLinks.linkedin && (
+              <div className="border-t border-border pt-4 space-y-3">
+                <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold block">Social Links</span>
+                <div className="flex gap-3 text-muted-foreground">
+                  {socialLinks.linkedin && (
                     <a
-                      href={teacher.socialLinks.linkedin}
+                      href={socialLinks.linkedin}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2 rounded-xl bg-slate-950 border border-slate-800 hover:text-indigo-400 hover:border-indigo-500/30 transition-colors"
+                      className="p-2 rounded-xl bg-background border border-border hover:text-primary hover:border-primary/40 transition-colors"
                       aria-label="LinkedIn"
                     >
                       <Linkedin size={14} />
                     </a>
                   )}
-                  {teacher.socialLinks.twitter && (
+                  {socialLinks.twitter && (
                     <a
-                      href={teacher.socialLinks.twitter}
+                      href={socialLinks.twitter}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2 rounded-xl bg-slate-950 border border-slate-800 hover:text-indigo-400 hover:border-indigo-500/30 transition-colors"
+                      className="p-2 rounded-xl bg-background border border-border hover:text-primary hover:border-primary/40 transition-colors"
                       aria-label="Twitter"
                     >
                       <Twitter size={14} />
                     </a>
                   )}
-                  {teacher.socialLinks.github && (
+                  {socialLinks.github && (
                     <a
-                      href={teacher.socialLinks.github}
+                      href={socialLinks.github}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2 rounded-xl bg-slate-950 border border-slate-800 hover:text-indigo-400 hover:border-indigo-500/30 transition-colors"
+                      className="p-2 rounded-xl bg-background border border-border hover:text-primary hover:border-primary/40 transition-colors"
                       aria-label="GitHub"
                     >
                       <Github size={14} />
