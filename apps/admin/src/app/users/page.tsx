@@ -34,6 +34,20 @@ export default function AdminUsersPage() {
   });
 
   React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('eduverse_admin_users');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setUsers(parsed);
+          }
+        }
+      } catch (e) {
+        // Ignore fallback
+      }
+    }
+
     subjectsService.getSubjects().then((items) => {
       setPlatformSubjects(items);
       if (items.length > 0 && items[0].name) {
@@ -91,7 +105,16 @@ export default function AdminUsersPage() {
 
     subjectsService.setTeacherAllowedSubjects(newTeacherForm.email, [newTeacherForm.subject]);
 
-    setUsers((prev) => [newTeacher, ...prev]);
+    const updatedUsers = [newTeacher, ...users];
+    setUsers(updatedUsers);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('eduverse_admin_users', JSON.stringify(updatedUsers));
+      } catch (e) {
+        // Ignore fallback
+      }
+    }
+
     setShowCreateTeacherModal(false);
     setNewTeacherForm({ name: '', email: '', subject: platformSubjects[0]?.name || 'الرياضيات', password: '', phone: '' });
     alert(`تم إنشاء حساب المدرس "${newTeacherForm.name}" بنجاح وتأكيده في كادر المنصة!`);

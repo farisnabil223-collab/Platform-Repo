@@ -28,14 +28,52 @@ const CUSTOM_TEACHERS_KEY = 'eduverse_custom_teachers';
 
 export function getStoredCustomTeachers(): Teacher[] {
   if (typeof window === 'undefined') return [];
+  const list: Teacher[] = [];
   try {
     const raw = localStorage.getItem(CUSTOM_TEACHERS_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) list.push(...parsed);
+    }
   } catch (e) {
-    return [];
+    // Ignore fallback errors
   }
+
+  try {
+    const adminRaw = localStorage.getItem('eduverse_admin_users');
+    if (adminRaw) {
+      const adminUsers = JSON.parse(adminRaw);
+      if (Array.isArray(adminUsers)) {
+        adminUsers.forEach((u: any) => {
+          if (u.role === 'TEACHER' && u.name && !list.some(t => t.id === u.id || t.email === u.email)) {
+            const slug = u.slug || u.name.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-') || `tch-${u.id}`;
+            list.push({
+              id: u.id || `t_${Date.now()}`,
+              slug,
+              name: u.name,
+              email: u.email,
+              avatar: u.avatar || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop&q=80',
+              bio: u.bio || `مدرس مادة ${u.subject || 'الأكاديمية'} المعين من الإدارة العليا.`,
+              detailedBio: u.detailedBio || `استشاري ومدرس مادة ${u.subject || 'الأكاديمية'} المعين رسمياً من إدارة المنصة لإلقاء الشروحات وتصحيح الاختبارات والواجبات المنهجية.`,
+              specialties: u.specialties || [u.subject || 'المادة الأكاديمية'],
+              qualifications: u.qualifications || [`بكالوريوس وتخصص ${u.subject || 'الأكاديمي'}`],
+              certificates: u.certificates || ['شهادة اعتماد التدريس الرقمي من المنصة'],
+              experienceYears: u.experienceYears || 8,
+              rating: u.rating || 5.0,
+              reviewsCount: u.reviewsCount || 0,
+              studentsCount: u.studentsCount || 0,
+              verifiedBadge: true,
+              subject: u.subject,
+            });
+          }
+        });
+      }
+    }
+  } catch (e) {
+    // Ignore fallback errors
+  }
+
+  return list;
 }
 
 export function saveStoredCustomTeacher(teacher: Teacher): Teacher {
@@ -68,6 +106,7 @@ const FALLBACK_TEACHERS: Teacher[] = [
     reviewsCount: 145,
     studentsCount: 1420,
     verifiedBadge: true,
+    subject: 'Mathematics',
   },
   {
     id: 't2222222-2222-4222-8222-222222222222',
@@ -85,6 +124,7 @@ const FALLBACK_TEACHERS: Teacher[] = [
     reviewsCount: 88,
     studentsCount: 850,
     verifiedBadge: true,
+    subject: 'Physics',
   },
   {
     id: 't3333333-3333-4333-8333-333333333333',
@@ -102,6 +142,41 @@ const FALLBACK_TEACHERS: Teacher[] = [
     reviewsCount: 210,
     studentsCount: 2100,
     verifiedBadge: true,
+    subject: 'Computer Science',
+  },
+  {
+    id: 't4444444-4444-4444-8444-444444444444',
+    slug: 'tch-9935',
+    name: 'د. طارق علي',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80',
+    bio: 'مدرس واستشاري مادة الفيزياء التطبيقية والكهربية.',
+    detailedBio: 'خبير تدريس الفيزياء للثانوية العامة والجامعات مع خبرة أكثر من 10 سنوات في إعداد الاختبارات ونشر الشروحات.',
+    specialties: ['الفيزياء', 'الميكانيكا', 'الكهربية'],
+    qualifications: ['دكتوراة الفيزياء النظرية والفيزياء الكهربية', 'استشاري التعليم الأكاديمي'],
+    certificates: ['شهادة معلم الفيزياء المعتمد من المنصة'],
+    experienceYears: 10,
+    rating: 4.9,
+    reviewsCount: 112,
+    studentsCount: 1280,
+    verifiedBadge: true,
+    subject: 'الفيزياء',
+  },
+  {
+    id: 't5555555-5555-4555-8555-555555555555',
+    slug: 'tch-9936',
+    name: 'د. سارة أحمد',
+    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop&q=80',
+    bio: 'مدرسة مادة الرياضيات العامة والهندسة الفراغية.',
+    detailedBio: 'استشارية تدريس الرياضيات والتفاضل والتكامل والهندسة الفراغية مع تقديم التطبيقات العملية للطلاب.',
+    specialties: ['الرياضيات', 'التفاضل والتكامل', 'الهندسة'],
+    qualifications: ['دكتوراة الرياضيات التطبيقية', 'ماجستير الجبر والهندسة'],
+    certificates: ['وسام التميز في التدريس الرقمي'],
+    experienceYears: 9,
+    rating: 4.9,
+    reviewsCount: 95,
+    studentsCount: 1100,
+    verifiedBadge: true,
+    subject: 'الرياضيات',
   },
 ];
 

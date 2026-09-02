@@ -31,6 +31,22 @@ export default function AdminUsersPage() {
     phone: '',
   });
 
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('eduverse_admin_users');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setUsers(parsed);
+          }
+        }
+      } catch (e) {
+        // Ignore fallback
+      }
+    }
+  }, []);
+
   const handleBulkAction = (action: string) => {
     alert(`Applying action: ${action} to selected accounts.`);
   };
@@ -78,7 +94,16 @@ export default function AdminUsersPage() {
       status: 'ACTIVE',
     };
 
-    setUsers((prev) => [newTeacher, ...prev]);
+    const updatedUsers = [newTeacher, ...users];
+    setUsers(updatedUsers);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('eduverse_admin_users', JSON.stringify(updatedUsers));
+      } catch (e) {
+        // Ignore fallback
+      }
+    }
+
     setShowCreateTeacherModal(false);
     setNewTeacherForm({ name: '', email: '', subject: 'الرياضيات', password: '', phone: '' });
     alert(`تم إنشاء حساب المدرس "${newTeacherForm.name}" بنجاح! يمكنه الآن نشر فيديوهاته وكورساته.`);
