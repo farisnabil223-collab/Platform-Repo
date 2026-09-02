@@ -115,7 +115,12 @@ export const PortalLayout: React.FC<PortalLayoutProps> = ({
       </a>
 
       {/* SIDEBAR - DESKTOP */}
-      <aside className="hidden lg:flex flex-col w-[260px] border-r border-border/60 bg-card select-none sticky top-0 h-screen shrink-0 z-30 overflow-hidden">
+      <aside
+        className={cn(
+          'hidden lg:flex flex-col w-[260px] border-r border-border/60 bg-card select-none fixed top-0 bottom-0 z-30 h-screen overflow-hidden',
+          dir === 'rtl' ? 'right-0 border-l border-r-0' : 'left-0 border-r'
+        )}
+      >
         {/* Logo and branding */}
         <div className="h-16 px-6 border-b border-border/40 flex items-center gap-3">
           <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-black font-heading text-lg">
@@ -247,7 +252,7 @@ export const PortalLayout: React.FC<PortalLayoutProps> = ({
       </AnimatePresence>
 
       {/* MAIN CONTAINER */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className={cn('flex-1 flex flex-col min-w-0', dir === 'rtl' ? 'lg:mr-[260px]' : 'lg:ml-[260px]')}>
         {/* TOP NAVBAR */}
         <header className="h-16 border-b border-border/60 bg-card/80 backdrop-blur-md px-6 flex items-center justify-between select-none z-10 sticky top-0">
           <div className="flex items-center gap-4">
