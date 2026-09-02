@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-redeclare */
 export interface ITeachersRepository {
   findPublic(params: {
     specialty?: string;

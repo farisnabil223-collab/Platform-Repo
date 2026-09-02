@@ -327,10 +327,20 @@ export default function CourseDetailsPage({ params }: { params: Promise<Params> 
               
               <div className="space-y-2">
                 <span className="text-[9px] uppercase tracking-wider font-bold text-muted-foreground font-heading">Course Investment</span>
-                <div className="flex items-baseline gap-1.5">
+                <div className="flex items-baseline gap-2 flex-wrap">
                   <span className="text-3xl font-black font-heading text-card-foreground">
                     {course.price === 0 ? 'Free' : `$${course.price.toFixed(2)}`}
                   </span>
+                  {course.originalPrice && course.originalPrice > course.price && (
+                    <>
+                      <span className="text-base text-muted-foreground line-through font-semibold">
+                        ${course.originalPrice.toFixed(2)}
+                      </span>
+                      <span className="text-xs font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded">
+                        -{Math.round(((course.originalPrice - course.price) / course.originalPrice) * 100)}% OFF
+                      </span>
+                    </>
+                  )}
                   {course.price > 0 && <span className="text-[10px] text-muted-foreground font-semibold">one-time payment</span>}
                 </div>
               </div>

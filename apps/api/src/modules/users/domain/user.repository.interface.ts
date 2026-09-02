@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-redeclare */
 export interface IUserRepository {
   findByEmail(email: string): Promise<any | null>;
   create(user: {

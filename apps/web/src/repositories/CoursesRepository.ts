@@ -21,6 +21,7 @@ export interface Course {
   attendancePercent?: number;
   credits: number;
   price: number;
+  originalPrice?: number;
   rating: number;
   reviewsCount: number;
   studentsCount: number;
@@ -46,6 +47,7 @@ const FALLBACK_COURSES: Course[] = [
     status: 'ACTIVE',
     credits: 3,
     price: 49.99,
+    originalPrice: 69.99,
     rating: 4.9,
     reviewsCount: 145,
     studentsCount: 1420,
@@ -69,6 +71,7 @@ const FALLBACK_COURSES: Course[] = [
     status: 'ACTIVE',
     credits: 4,
     price: 79.99,
+    originalPrice: 99.99,
     rating: 4.8,
     reviewsCount: 88,
     studentsCount: 850,

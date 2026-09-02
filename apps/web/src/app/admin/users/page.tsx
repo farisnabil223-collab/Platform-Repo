@@ -1,5 +1,5 @@
 'use client';
-/* eslint-disable no-undef, @typescript-eslint/no-unused-vars, quotes */
+/* eslint-disable no-undef, quotes */
 
 import React from 'react';
 import { PortalLayout, Button, Badge } from '@eduverse/ui';

@@ -1,5 +1,5 @@
 'use client';
-/* eslint-disable no-undef, @typescript-eslint/no-unused-vars, quotes */
+/* eslint-disable no-undef, @typescript-eslint/no-unused-vars */
 
 import React from 'react';
 import Link from 'next/link';

@@ -19,6 +19,7 @@ interface CourseCardProps {
     instructorAvatar?: string;
     category: string;
     price: number;
+    originalPrice?: number;
     rating: number;
     reviewsCount: number;
     studentsCount: number;
@@ -107,7 +108,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
 
       {/* Footer */}
       <div className="p-4 border-t border-border bg-muted/40 flex items-center justify-between">
-        <PriceBadge price={course.price} />
+        <PriceBadge price={course.price} originalPrice={course.originalPrice} />
         <Link href={`/courses/${course.slug}`} className="text-[10px] font-extrabold text-teal hover:underline transition-colors flex items-center gap-1">
           Start Quest &rarr;
         </Link>

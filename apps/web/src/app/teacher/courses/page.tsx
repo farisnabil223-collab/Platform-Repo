@@ -1,5 +1,5 @@
 'use client';
-/* eslint-disable no-undef, @typescript-eslint/no-unused-vars, quotes */
+/* eslint-disable @typescript-eslint/no-unused-vars, quotes */
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
@@ -29,6 +29,7 @@ export default function TeacherCoursesPage() {
   const [courseTitle, setCourseTitle] = React.useState('');
   const [courseDesc, setCourseDesc] = React.useState('');
   const [coursePrice, setCoursePrice] = React.useState('350');
+  const [courseOriginalPrice, setCourseOriginalPrice] = React.useState('500');
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const fetchCourses = () => {
@@ -37,8 +38,8 @@ export default function TeacherCoursesPage() {
       // Fallback mocks if database empty
       if (data.length === 0) {
         setCourses([
-          { id: 'math-101', code: 'MATH-101', title: 'Calculus I - التفاضل والتكامل', description: 'أساسيات النهاية والتفاضل وتطبيقاتها.', status: 'ACTIVE', studentCount: 142, price: 350 },
-          { id: 'phys-202', code: 'PHYS-202', title: 'Quantum Physics - الفيزياء الحديثة', description: 'الظاهرة الكهروديناميكية والفيزياء.', status: 'ACTIVE', studentCount: 89, price: 450 },
+          { id: 'math-101', code: 'MATH-101', title: 'Calculus I - التفاضل والتكامل', description: 'أساسيات النهاية والتفاضل وتطبيقاتها.', status: 'ACTIVE', studentCount: 142, price: 350, originalPrice: 500 },
+          { id: 'phys-202', code: 'PHYS-202', title: 'Quantum Physics - الفيزياء الحديثة', description: 'الظاهرة الكهروديناميكية والفيزياء.', status: 'ACTIVE', studentCount: 89, price: 450, originalPrice: 600 },
         ]);
       } else {
         setCourses(data);
@@ -62,12 +63,14 @@ export default function TeacherCoursesPage() {
         title: courseTitle,
         description: courseDesc,
         price: Number(coursePrice) || 0,
+        originalPrice: Number(courseOriginalPrice) || undefined,
         status: 'ACTIVE',
       });
       setCourseCode('');
       setCourseTitle('');
       setCourseDesc('');
       setCoursePrice('350');
+      setCourseOriginalPrice('500');
       setShowModal(false);
       fetchCourses();
     } catch (err) {
@@ -75,12 +78,13 @@ export default function TeacherCoursesPage() {
       const mockId = Math.random().toString();
       setCourses((prev) => [
         ...prev,
-        { id: mockId, code: courseCode, title: courseTitle, description: courseDesc, price: Number(coursePrice) || 350, status: 'ACTIVE', studentCount: 0 },
+        { id: mockId, code: courseCode, title: courseTitle, description: courseDesc, price: Number(coursePrice) || 350, originalPrice: Number(courseOriginalPrice) || 500, status: 'ACTIVE', studentCount: 0 },
       ]);
       setCourseCode('');
       setCourseTitle('');
       setCourseDesc('');
       setCoursePrice('350');
+      setCourseOriginalPrice('500');
       setShowModal(false);
     } finally {
       setIsSubmitting(false);
@@ -176,9 +180,21 @@ export default function TeacherCoursesPage() {
                   <span className="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded font-bold uppercase font-mono">
                     {c.code}
                   </span>
-                  <span className="text-xs bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-full font-bold">
-                    💰 {c.price || 350} ج.م
-                  </span>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {c.originalPrice && c.originalPrice > (c.price || 350) && (
+                      <span className="text-[10px] text-muted-foreground line-through font-semibold">
+                        {c.originalPrice} ج.م
+                      </span>
+                    )}
+                    <span className="text-xs bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-full font-bold">
+                      💰 {c.price || 350} ج.م
+                    </span>
+                    {c.originalPrice && c.originalPrice > (c.price || 350) && (
+                      <span className="text-[9px] font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1 py-0.2 rounded">
+                        -{Math.round(((c.originalPrice - (c.price || 350)) / c.originalPrice) * 100)}%
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <h4 className="text-sm font-bold text-foreground font-heading mt-1">{c.title}</h4>
                 <p className="text-[11px] text-muted-foreground line-clamp-2 mt-0.5">{c.description}</p>
@@ -199,11 +215,11 @@ export default function TeacherCoursesPage() {
           <Card className="max-w-md w-full bg-card border-border text-card-foreground shadow-2xl">
             <CardHeader className="p-6 pb-3">
               <CardTitle className="text-card-foreground text-base font-bold font-heading">إنشاء كورس جديد وتحديد سعره</CardTitle>
-              <CardDescription className="text-muted-foreground text-xs">أدخل كود الكورس، العنوان، السعر بالجنيه والوصف الفني.</CardDescription>
+              <CardDescription className="text-muted-foreground text-xs">أدخل كود الكورس، العنوان، السعر الأساسي والخصم والوصف الفني.</CardDescription>
             </CardHeader>
             <CardContent className="p-6 pt-0">
               <form onSubmit={handleCreateCourse} className="space-y-4 font-heading">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-3 gap-2">
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold text-card-foreground">كود الكورس *</label>
                     <input
@@ -211,12 +227,22 @@ export default function TeacherCoursesPage() {
                       required
                       value={courseCode}
                       onChange={(e) => setCourseCode(e.target.value)}
-                      placeholder="مثال: MATH-101"
+                      placeholder="MATH-101"
                       className="p-2.5 bg-background border border-border rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 text-foreground transition-all"
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-card-foreground">سعر الاشتراك (ج.م) *</label>
+                    <label className="text-xs font-bold text-card-foreground">السعر الأساسي (ج.م)</label>
+                    <input
+                      type="number"
+                      value={courseOriginalPrice}
+                      onChange={(e) => setCourseOriginalPrice(e.target.value)}
+                      placeholder="500"
+                      className="p-2.5 bg-background border border-border rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 text-foreground transition-all font-semibold"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-card-foreground">السعر بعد الخصم *</label>
                     <input
                       type="number"
                       required
