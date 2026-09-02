@@ -1,5 +1,5 @@
 import { BaseRepository } from './BaseRepository';
-import api from '../services/api';
+import { subjectsService } from '../services/subjectsService';
 
 export interface Subject {
   id: string;
@@ -12,35 +12,26 @@ export interface Subject {
   weeklyHours?: number;
 }
 
-const FALLBACK_SUBJECTS: Subject[] = [
-  { id: 'subj-1', slug: 'math-subj', name: 'Mathematics', description: 'From foundational algebra to advanced differential calculus.', iconName: 'courses', grades: ['University'], creditHours: 3 },
-  { id: 'subj-2', slug: 'phys-subj', name: 'Science', description: 'Quantum wave mechanics, astrophysics, and chemistry.', iconName: 'activity', grades: ['Grade 12'], creditHours: 4 },
-  { id: 'subj-3', slug: 'tech-subj', name: 'Technology', description: 'Operating systems, algorithms, and software engineering.', iconName: 'dashboard', grades: ['University'], creditHours: 4 },
-  { id: 'subj-4', slug: 'hum-subj', name: 'Humanities', description: 'Literature, philosophy, and history outlines.', iconName: 'book', grades: ['Grade 12'], creditHours: 2 },
-];
-
 class SubjectsRepository extends BaseRepository {
   async getAll(): Promise<Subject[]> {
     try {
-      const response = await api.get<any>('/public/subjects');
-      const apiItems = response.data || [];
-      if (Array.isArray(apiItems) && apiItems.length > 0) {
-        return apiItems.map((subj: any) => ({
+      const platformSubjs = await subjectsService.getSubjects();
+      if (platformSubjs && platformSubjs.length > 0) {
+        return platformSubjs.map((subj) => ({
           id: subj.id,
-          slug: subj.code?.toLowerCase() || subj.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+          slug: subj.slug || subj.code.toLowerCase(),
           name: subj.name,
-          description: subj.description || 'Subject learning syllabus.',
-          iconName: subj.code === 'MATH-SUBJ' ? 'courses' : subj.code === 'PHYS-SUBJ' ? 'activity' : subj.code === 'TECH-SUBJ' ? 'dashboard' : 'book',
-          grades: subj.grade?.level ? [subj.grade.level] : ['University'],
-          creditHours: subj.creditHours,
-          weeklyHours: subj.weeklyHours,
+          description: subj.description || 'وصف ورؤية المنهج الدراسي.',
+          iconName: subj.iconName || 'courses',
+          grades: [subj.gradeLevel || 'جميع المراحل'],
+          creditHours: subj.creditHours || 3,
+          weeklyHours: subj.weeklyHours || 4,
         }));
       }
-      return FALLBACK_SUBJECTS;
     } catch (error) {
       this.handleError('getAllSubjects', error);
-      return FALLBACK_SUBJECTS;
     }
+    return [];
   }
 
   async getBySlug(slug: string): Promise<Subject | null> {

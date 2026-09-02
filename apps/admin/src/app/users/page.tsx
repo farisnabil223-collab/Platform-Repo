@@ -1,8 +1,9 @@
 'use client';
-/* eslint-disable no-undef, @typescript-eslint/no-unused-vars, quotes */
+/* eslint-disable no-undef, @typescript-eslint/no-unused-vars */
 
 import React from 'react';
 import { PortalLayout, Button, Badge } from '@eduverse/ui';
+import { subjectsService, SubjectItem } from '../../services/subjectsService';
 
 interface UserItem {
   id: string;
@@ -20,6 +21,7 @@ export default function AdminUsersPage() {
     { id: '3', name: 'د. سارة أحمد', email: 'sara@example.com', role: 'TEACHER', subject: 'الرياضيات', status: 'ACTIVE' },
   ]);
 
+  const [platformSubjects, setPlatformSubjects] = React.useState<SubjectItem[]>([]);
   const [showCreateTeacherModal, setShowCreateTeacherModal] = React.useState(false);
   const [importPreview, setImportPreview] = React.useState<any[] | null>(null);
   const [newTeacherForm, setNewTeacherForm] = React.useState({
@@ -29,6 +31,15 @@ export default function AdminUsersPage() {
     password: '',
     phone: '',
   });
+
+  React.useEffect(() => {
+    subjectsService.getSubjects().then((items) => {
+      setPlatformSubjects(items);
+      if (items.length > 0 && items[0].name) {
+        setNewTeacherForm((prev) => ({ ...prev, subject: items[0].name }));
+      }
+    });
+  }, []);
 
   const handleBulkAction = (action: string) => {
     alert(`Applying action: ${action} to selected accounts.`);
@@ -50,10 +61,12 @@ export default function AdminUsersPage() {
       status: 'ACTIVE',
     };
 
+    subjectsService.setTeacherAllowedSubjects(newTeacherForm.email, [newTeacherForm.subject]);
+
     setUsers((prev) => [newTeacher, ...prev]);
     setShowCreateTeacherModal(false);
-    setNewTeacherForm({ name: '', email: '', subject: 'الرياضيات', password: '', phone: '' });
-    alert(`تم إنشاء حساب المدرس بنجاح! يمكنه الآن تسجيل الدخول وحساب أرباحه.`);
+    setNewTeacherForm({ name: '', email: '', subject: platformSubjects[0]?.name || 'الرياضيات', password: '', phone: '' });
+    alert(`تم إنشاء حساب المدرس بنجاح وتصريحه لمادة "${newTeacherForm.subject}"! يمكنه الآن نشر كورساته بهذه المادة.`);
   };
 
   const handleCsvImportSimulate = () => {
@@ -136,14 +149,13 @@ export default function AdminUsersPage() {
                     <select
                       value={newTeacherForm.subject}
                       onChange={(e) => setNewTeacherForm({ ...newTeacherForm, subject: e.target.value })}
-                      className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 font-bold"
                     >
-                      <option value="الرياضيات">الرياضيات</option>
-                      <option value="الفيزياء">الفيزياء</option>
-                      <option value="الكيمياء">الكيمياء</option>
-                      <option value="الأحياء">الأحياء</option>
-                      <option value="اللغة العربية">اللغة العربية</option>
-                      <option value="اللغة الإنجليزية">اللغة الإنجليزية</option>
+                      {platformSubjects.map((s) => (
+                        <option key={s.id} value={s.name}>
+                          {s.name} ({s.code})
+                        </option>
+                      ))}
                     </select>
                   </div>
                   <div>

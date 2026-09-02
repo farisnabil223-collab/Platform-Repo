@@ -15,10 +15,13 @@ import {
   Badge,
 } from '@eduverse/ui';
 import { teacherCoursesService } from '../../../services/teacherCoursesService';
+import { subjectsService, SubjectItem } from '../../../services/subjectsService';
 
 export default function TeacherCoursesPage() {
   const router = useRouter();
   const [courses, setCourses] = React.useState<any[]>([]);
+  const [allowedSubjects, setAllowedSubjects] = React.useState<SubjectItem[]>([]);
+  const [selectedSubject, setSelectedSubject] = React.useState<string>('الرياضيات');
   const [search, setSearch] = React.useState('');
   const [filter, setFilter] = React.useState<'ACTIVE' | 'ARCHIVED'>('ACTIVE');
   const [loading, setLoading] = React.useState(true);
@@ -38,8 +41,8 @@ export default function TeacherCoursesPage() {
       // Fallback mocks if database empty
       if (data.length === 0) {
         setCourses([
-          { id: 'math-101', code: 'MATH-101', title: 'Calculus I - التفاضل والتكامل', description: 'أساسيات النهاية والتفاضل وتطبيقاتها.', status: 'ACTIVE', studentCount: 142, price: 350, originalPrice: 500 },
-          { id: 'phys-202', code: 'PHYS-202', title: 'Quantum Physics - الفيزياء الحديثة', description: 'الظاهرة الكهروديناميكية والفيزياء.', status: 'ACTIVE', studentCount: 89, price: 450, originalPrice: 600 },
+          { id: 'math-101', code: 'MATH-101', title: 'Calculus I - التفاضل والتكامل', description: 'أساسيات النهاية والتفاضل وتطبيقاتها.', subject: 'الرياضيات', status: 'ACTIVE', studentCount: 142, price: 350, originalPrice: 500 },
+          { id: 'phys-202', code: 'PHYS-202', title: 'Quantum Physics - الفيزياء الحديثة', description: 'الظاهرة الكهروديناميكية والفيزياء.', subject: 'الفيزياء', status: 'ACTIVE', studentCount: 89, price: 450, originalPrice: 600 },
         ]);
       } else {
         setCourses(data);
@@ -50,6 +53,12 @@ export default function TeacherCoursesPage() {
 
   React.useEffect(() => {
     fetchCourses();
+    subjectsService.getSubjects().then((allSubjs) => {
+      setAllowedSubjects(allSubjs);
+      if (allSubjs.length > 0) {
+        setSelectedSubject(allSubjs[0].name);
+      }
+    });
   }, []);
 
   const handleCreateCourse = async (e: React.FormEvent) => {
@@ -254,16 +263,33 @@ export default function TeacherCoursesPage() {
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-card-foreground">عنوان الكورس *</label>
-                  <input
-                    type="text"
-                    required
-                    value={courseTitle}
-                    onChange={(e) => setCourseTitle(e.target.value)}
-                    placeholder="مثال: كورس الرياضيات التطبيقية"
-                    className="p-2.5 bg-background border border-border rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 text-foreground transition-all"
-                  />
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-card-foreground">المادة الدراسية (Subject) *</label>
+                    <select
+                      value={selectedSubject}
+                      onChange={(e) => setSelectedSubject(e.target.value)}
+                      className="p-2.5 bg-background border border-border rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 text-foreground font-bold"
+                    >
+                      {allowedSubjects.map((subj) => (
+                        <option key={subj.id} value={subj.name}>
+                          {subj.name} ({subj.code})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-card-foreground">عنوان الكورس *</label>
+                    <input
+                      type="text"
+                      required
+                      value={courseTitle}
+                      onChange={(e) => setCourseTitle(e.target.value)}
+                      placeholder="مثال: كورس الرياضيات التطبيقية"
+                      className="p-2.5 bg-background border border-border rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 text-foreground transition-all"
+                    />
+                  </div>
                 </div>
 
                 <div className="flex flex-col gap-1.5">
