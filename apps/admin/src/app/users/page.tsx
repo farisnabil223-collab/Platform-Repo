@@ -224,7 +224,7 @@ export default function AdminUsersPage() {
                   <td className="py-3 px-4 text-right">
                     {u.role === 'TEACHER' && (
                       <a
-                        href="https://platform-repo-web.vercel.app/teacher/dashboard"
+                        href={`${process.env.NEXT_PUBLIC_WEB_URL || 'https://eduverse-n0ta5zjea-farisnabil223-2417.vercel.app'}/teacher/dashboard`}
                         target="_blank"
                         rel="noreferrer"
                         className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400 hover:text-emerald-300 underline"

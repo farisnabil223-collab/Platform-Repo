@@ -12,7 +12,7 @@ export interface EnvironmentConfig {
 }
 
 const DEFAULT_JWT_SECRET = 'eduverse_production_secure_jwt_secret_key_2026_super_encrypted_platform_token';
-const DEFAULT_WEB_URL = 'https://platform-repo-web.vercel.app';
+const DEFAULT_WEB_URL = 'https://eduverse-n0ta5zjea-farisnabil223-2417.vercel.app';
 const DEFAULT_ADMIN_URL = 'https://platform-repo-admin.vercel.app';
 const DEFAULT_DATABASE_URL = 'postgresql://postgres:postgres@localhost:5432/eduverse';
 

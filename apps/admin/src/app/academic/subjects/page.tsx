@@ -192,7 +192,7 @@ export default function AdminSubjectsPage() {
 
                   <div className="flex justify-between items-center pt-2">
                     <a
-                      href={`https://platform-repo-web.vercel.app/subjects/${s.slug}`}
+                      href={`${process.env.NEXT_PUBLIC_WEB_URL || 'https://eduverse-n0ta5zjea-farisnabil223-2417.vercel.app'}/subjects/${s.slug}`}
                       target="_blank"
                       rel="noreferrer"
                       className="text-[10px] text-teal hover:underline font-bold"
