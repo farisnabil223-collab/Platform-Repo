@@ -13,6 +13,8 @@ interface UserItem {
   role: string;
   status: string;
   subject?: string;
+  bio?: string;
+  avatar?: string;
 }
 
 export default function AdminUsersPage() {
