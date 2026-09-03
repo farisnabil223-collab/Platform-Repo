@@ -22,9 +22,17 @@ export default function TeachersDirectoryPage() {
     loadTeachers();
     window.addEventListener('eduverse-teachers-updated', loadTeachers);
     window.addEventListener('storage', loadTeachers);
+
+    let channel: BroadcastChannel | null = null;
+    if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+      channel = new BroadcastChannel('eduverse-teachers-sync');
+      channel.onmessage = () => loadTeachers();
+    }
+
     return () => {
       window.removeEventListener('eduverse-teachers-updated', loadTeachers);
       window.removeEventListener('storage', loadTeachers);
+      if (channel) channel.close();
     };
   }, []);
 
