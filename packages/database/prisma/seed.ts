@@ -169,7 +169,7 @@ async function main() {
         userId: demoStudentUser.id,
         studentCode: 'EV-2026-8942',
         status: 'ACTIVE',
-        academicMetadata: { advisor: 'Dr. Emily Watson', department: 'Mathematics' },
+        academicMetadata: { advisor: 'د. سارة أحمد', department: 'الرياضيات' },
       },
     });
 
@@ -195,13 +195,13 @@ async function main() {
 
     const demoTeacherProfile = await prisma.teacher.upsert({
       where: { userId: demoTeacherUser.id },
-      update: { bio: 'Professor of Mathematics and Quantum Computation.' },
+      update: { bio: 'مدرسة واستشارية مادة الرياضيات العامة والهندسة الفراغية.' },
       create: {
         id: DEMO_TEACHER_PROFILE_ID,
         userId: demoTeacherUser.id,
-        teacherCode: 'TCH-9932',
-        bio: 'Professor of Mathematics and Quantum Computation.',
-        specialties: ['Calculus', 'Quantum Physics'],
+        teacherCode: 'TCH-9936',
+        bio: 'مدرسة واستشارية مادة الرياضيات العامة والهندسة الفراغية.',
+        specialties: ['الرياضيات', 'الهندسة'],
       },
     });
 

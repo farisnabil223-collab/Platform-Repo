@@ -34,9 +34,12 @@ export function getStoredCustomTeachers(): Teacher[] {
 
   const addUnique = (t: any) => {
     if (!t || !t.name) return;
-    // Filter out fake legacy mock names
-    const isFakeMock = ['dr. emily watson', 'dr. arthur feynman', 'prof. linus torvalds'].includes((t.name || '').toLowerCase());
-    if (isFakeMock) return;
+    // Filter out fake legacy mock names and IDs
+    const lowerName = (t.name || '').toLowerCase();
+    const fakeKeywords = ['emily watson', 'arthur feynman', 'linus torvalds', 'faculty member'];
+    const isFakeName = fakeKeywords.some(keyword => lowerName.includes(keyword));
+    const isFakeId = ['t1111111-1111-4111-8111-111111111111', 't2222222-2222-4222-8222-222222222222', 't3333333-3333-4333-8333-333333333333'].includes(t.id);
+    if (isFakeName || isFakeId) return;
 
     if (!list.some(existing => existing.id === t.id || (existing.email && t.email && existing.email === t.email) || existing.slug === t.slug)) {
       const slug = t.slug || t.name.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-') || `tch-${t.id || Date.now()}`;
@@ -206,8 +209,11 @@ class TeachersRepository extends BaseRepository {
       const response = await api.get<any>('/public/teachers');
       if (response && response.data?.items && Array.isArray(response.data.items)) {
         apiItems = response.data.items.filter((t: any) => {
-          const isFakeMock = ['dr. emily watson', 'dr. arthur feynman', 'prof. linus torvalds'].includes((t.name || '').toLowerCase());
-          return !isFakeMock;
+          const lowerName = (t.name || '').toLowerCase();
+          const fakeKeywords = ['emily watson', 'arthur feynman', 'linus torvalds', 'faculty member'];
+          const isFakeName = fakeKeywords.some(keyword => lowerName.includes(keyword));
+          const isFakeId = ['t1111111-1111-4111-8111-111111111111', 't2222222-2222-4222-8222-222222222222', 't3333333-3333-4333-8333-333333333333'].includes(t.id);
+          return !isFakeName && !isFakeId;
         });
       }
     } catch (error) {

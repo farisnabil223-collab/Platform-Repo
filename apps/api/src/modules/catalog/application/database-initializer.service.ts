@@ -101,9 +101,8 @@ export class DatabaseInitializerService implements OnApplicationBootstrap {
     }
 
     const teacherData = [
-      { email: 'teacher@eduverse.com', code: 'TCH-9932', specialties: ['Mathematics', 'Calculus'], bio: 'Professor of Mathematics and Quantum Computation.' },
-      { email: 'feynman@eduverse.com', code: 'TCH-9933', specialties: ['Physics', 'Quantum Mechanics'], bio: 'Instructor of Theoretical Wave Mechanics.' },
-      { email: 'torvalds@eduverse.com', code: 'TCH-9934', specialties: ['Computer Science', 'Operating Systems'], bio: 'Instructor of Kernel Engineering & Low-Level Code.' },
+      { email: 'sara@eduverse.com', code: 'TCH-9936', specialties: ['الرياضيات', 'الهندسة'], bio: 'مدرسة واستشارية مادة الرياضيات العامة والهندسة الفراغية.' },
+      { email: 'tarek@eduverse.com', code: 'TCH-9935', specialties: ['الفيزياء', 'الميكانيكا'], bio: 'مدرس واستشاري مادة الفيزياء التطبيقية والكهربية للثانوية العامة والجامعات.' },
     ];
 
     for (const data of teacherData) {

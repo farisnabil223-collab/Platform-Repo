@@ -21,7 +21,7 @@ interface UserItem {
 export default function AdminUsersPage() {
   const [users, setUsers] = React.useState<UserItem[]>([
     { id: '1', name: 'Sophia Johnson', email: 'sophia@example.com', role: 'STUDENT', status: 'ACTIVE' },
-    { id: '2', name: 'Dr. Emily Watson', email: 'emily@example.com', role: 'TEACHER', subject: 'الفيزياء', status: 'ACTIVE' },
+    { id: '2', name: 'د. طارق علي', email: 'tarek@example.com', role: 'TEACHER', subject: 'الفيزياء', status: 'ACTIVE' },
   ]);
 
   const [showCreateTeacherModal, setShowCreateTeacherModal] = React.useState(false);
