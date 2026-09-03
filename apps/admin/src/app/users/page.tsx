@@ -31,6 +31,8 @@ export default function AdminUsersPage() {
     subject: 'الرياضيات',
     password: '',
     phone: '',
+    bio: '',
+    avatar: '',
   });
 
   React.useEffect(() => {
@@ -74,15 +76,17 @@ export default function AdminUsersPage() {
       .replace(/[\s_-]+/g, '-') || `tch-${Date.now()}`;
 
     const newTeacherId = `t_${Date.now()}`;
+    const avatarUrl = newTeacherForm.avatar.trim() || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop&q=80';
+    const teacherBio = newTeacherForm.bio.trim() || `مدرس واستشاري مادة ${newTeacherForm.subject} المعين من الإدارة العليا.`;
 
     teachersRepository.saveTeacher({
       id: newTeacherId,
       slug: teacherSlug,
       name: newTeacherForm.name,
       email: newTeacherForm.email,
-      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop&q=80',
-      bio: `مدرس مادة ${newTeacherForm.subject} المعين من الإدارة العليا.`,
-      detailedBio: `استشاري ومدرس مادة ${newTeacherForm.subject} المعين رسمياً من إدارة المنصة لإلقاء الشروحات وتصحيح الاختبارات والواجبات المنهجية.`,
+      avatar: avatarUrl,
+      bio: teacherBio,
+      detailedBio: teacherBio,
       specialties: [newTeacherForm.subject],
       qualifications: [`بكالوريوس وتخصص ${newTeacherForm.subject}`, 'معتمد رسمياً من الإدارة التعليمية'],
       certificates: ['شهادة اعتماد التدريس الرقمي من المنصة'],
@@ -101,6 +105,8 @@ export default function AdminUsersPage() {
       role: 'TEACHER',
       subject: newTeacherForm.subject,
       status: 'ACTIVE',
+      bio: teacherBio,
+      avatar: avatarUrl,
     };
 
     subjectsService.setTeacherAllowedSubjects(newTeacherForm.email, [newTeacherForm.subject]);
@@ -116,7 +122,7 @@ export default function AdminUsersPage() {
     }
 
     setShowCreateTeacherModal(false);
-    setNewTeacherForm({ name: '', email: '', subject: platformSubjects[0]?.name || 'الرياضيات', password: '', phone: '' });
+    setNewTeacherForm({ name: '', email: '', subject: platformSubjects[0]?.name || 'الرياضيات', password: '', phone: '', bio: '', avatar: '' });
     alert(`تم إنشاء حساب المدرس "${newTeacherForm.name}" بنجاح وتأكيده في كادر المنصة!`);
   };
 
@@ -219,6 +225,28 @@ export default function AdminUsersPage() {
                       className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
                   </div>
+                </div>
+
+                <div>
+                  <label className="block mb-1 font-bold text-card-foreground">الوصف والنبذة التعريفية للمدرس (يظهر في الكارت والبروفايل)</label>
+                  <textarea
+                    rows={2}
+                    placeholder="مثال: استشاري مادة الفيزياء والكهربية، خبير تدريس الثانوية العامة لأكثر من 10 سنوات."
+                    value={newTeacherForm.bio}
+                    onChange={(e) => setNewTeacherForm({ ...newTeacherForm, bio: e.target.value })}
+                    className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="block mb-1 font-bold text-card-foreground">رابط الصورة الشخصية (Avatar URL)</label>
+                  <input
+                    type="text"
+                    placeholder="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400 (أو اتركه فارغاً للصورة التلقائية)"
+                    value={newTeacherForm.avatar}
+                    onChange={(e) => setNewTeacherForm({ ...newTeacherForm, avatar: e.target.value })}
+                    className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs"
+                  />
                 </div>
 
                 <div>
